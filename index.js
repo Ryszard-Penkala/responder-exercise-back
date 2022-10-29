@@ -1,3 +1,4 @@
+const {Router} = require('express')
 const express = require('express')
 const { urlencoded, json } = require('body-parser')
 const makeRepositories = require('./middleware/repositories')
@@ -20,7 +21,10 @@ app.get('/questions', async (req, res) => {
   res.json(questions)
 })
 
-app.get('/questions/:questionId', (req, res) => {})
+app.get('/questions/:questionId', async (req, res) => {
+  const questionWithId = await req.repositories.questionRepo.getQuestionById(req.params.questionId);
+  res.json(questionWithId);
+})
 
 app.post('/questions', (req, res) => {})
 
