@@ -1,7 +1,9 @@
-const {Router} = require('express')
 const express = require('express')
 const { urlencoded, json } = require('body-parser')
 const makeRepositories = require('./middleware/repositories')
+const { handleError, ValidationError } = require('./utils/errors')
+const { homeRouter } = require('./routers/home')
+const { questionRouter } = require('./routers/question')
 
 const STORAGE_FILE_PATH = 'questions.json'
 const PORT = 3000
@@ -12,27 +14,10 @@ app.use(urlencoded({ extended: true }))
 app.use(json())
 app.use(makeRepositories(STORAGE_FILE_PATH))
 
-app.get('/', (_, res) => {
-  res.json({ message: 'Welcome to responder!' })
-})
+app.use('/', homeRouter);
+app.use('/questions', questionRouter)
 
-app.get('/questions', async (req, res) => {
-  const questions = await req.repositories.questionRepo.getQuestions()
-  res.json(questions)
-})
-
-app.get('/questions/:questionId', async (req, res) => {
-  const questionWithId = await req.repositories.questionRepo.getQuestionById(req.params.questionId);
-  res.json(questionWithId);
-})
-
-app.post('/questions', (req, res) => {})
-
-app.get('/questions/:questionId/answers', (req, res) => {})
-
-app.post('/questions/:questionId/answers', (req, res) => {})
-
-app.get('/questions/:questionId/answers/:answerId', (req, res) => {})
+app.use(handleError);
 
 app.listen(PORT, () => {
   console.log(`Responder app listening on port ${PORT}`)
