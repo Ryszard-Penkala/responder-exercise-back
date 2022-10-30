@@ -1,11 +1,14 @@
 const { Router } = require('express')
+const { QuestionRecord } = require('../records/question.record')
 
 const questionRouter = Router();
 
 questionRouter
   .get('/', async (req, res) => {
-    const questions = await req.repositories.questionRepo.getQuestions()
-    res.json(questions)
+    const allQuestions = await QuestionRecord.getAllQuestions()
+    res.json(allQuestions);
+    // const questions = await req.repositories.questionRepo.getQuestions()
+    // res.json(questions)
   })
 
   .get('/:questionId', async (req, res)=> {
@@ -13,7 +16,12 @@ questionRouter
     res.json(questionWithId);
   })
 
-  .post('/', (req, res) => {})
+  .post('/', async (req, res) => {
+    const data = req.body
+    const newQuestion = new QuestionRecord(data)
+    const questionId = await newQuestion.insertQuestion();
+    res.json(questionId);
+  })
 
   .get('/:questionId/answers', (req, res) => {})
 
