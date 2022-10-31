@@ -5,8 +5,8 @@ const questionRouter = Router();
 
 questionRouter
   .get('/', async (req, res) => {
-    const allQuestions = await QuestionRecord.getAllQuestions()
-    res.json(allQuestions);
+    const allQuestionsWithAnswers = await QuestionRecord.getAllQuestionsAndAnswers()
+    res.json(allQuestionsWithAnswers);
     // const questions = await req.repositories.questionRepo.getQuestions()
     // res.json(questions)
   })

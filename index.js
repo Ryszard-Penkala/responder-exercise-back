@@ -1,7 +1,7 @@
 const express = require('express')
+require('express-async-errors');
 const { urlencoded, json } = require('body-parser')
 const cors = require('cors');
-require('express-async-errors');
 require('./utils/db');
 
 const makeRepositories = require('./middleware/repositories')

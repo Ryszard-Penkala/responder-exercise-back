@@ -26,6 +26,22 @@ class QuestionRecord {
     return  results;
   }
 
+  static async getAllQuestionsAndAnswers(){
+
+    const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`")
+    const outputArr = []
+    results.forEach(result => {
+      const questionObj = {
+        "id": result.id,
+        "author": result.author,
+        "summary": result.summary,
+        "answers": JSON.parse(result.answers)[0].id === null ? [] : JSON.parse(result.answers),
+      };
+      outputArr.push(questionObj)
+    })
+    return outputArr;
+  }
+
   async insertQuestion() {
     if(!this.id){
       this.id = uuid();
