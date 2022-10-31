@@ -7,12 +7,10 @@ questionRouter
   .get('/', async (req, res) => {
     const allQuestionsWithAnswers = await QuestionRecord.getAllQuestionsAndAnswers()
     res.json(allQuestionsWithAnswers);
-    // const questions = await req.repositories.questionRepo.getQuestions()
-    // res.json(questions)
   })
 
   .get('/:questionId', async (req, res)=> {
-    const questionWithId = await req.repositories.questionRepo.getQuestionById(req.params.questionId);
+    const questionWithId = await QuestionRecord.getQuestionById(req.params.questionId);
     res.json(questionWithId);
   })
 

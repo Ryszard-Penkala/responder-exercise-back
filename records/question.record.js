@@ -1,6 +1,7 @@
 const { pool } = require('../utils/db')
 const { ValidationError } = require('../utils/errors')
 const {v4: uuid} = require('uuid');
+const { readFile } = require('fs/promises')
 
 class QuestionRecord {
   constructor(obj) {
@@ -32,15 +33,25 @@ class QuestionRecord {
     const outputArr = []
     results.forEach(result => {
       const questionObj = {
-        "id": result.id,
-        "author": result.author,
-        "summary": result.summary,
+        ...result,
         "answers": JSON.parse(result.answers)[0].id === null ? [] : JSON.parse(result.answers),
       };
       outputArr.push(questionObj)
     })
     return outputArr;
   }
+
+
+  static async getQuestionById(questionId) {
+    const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
+    id: questionId,
+  })
+
+    return { ...results[0],
+            "answers": JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
+  }
+
+
 
   async insertQuestion() {
     if(!this.id){
