@@ -1,11 +1,9 @@
 const { pool } = require('../utils/db')
 const { ValidationError } = require('../utils/errors')
 const {v4: uuid} = require('uuid');
-const { readFile } = require('fs/promises')
 
 class QuestionRecord {
   constructor(obj) {
-    console.log(obj)
 
     if (!obj.summary || obj.summary.length <= 5 || obj.summary.length > 300) {
       throw new ValidationError('Summary has to be not-empty string between 1 and 300 chars long.')
@@ -41,7 +39,6 @@ class QuestionRecord {
     return outputArr;
   }
 
-
   static async getQuestionById(questionId) {
     const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
     id: questionId,
@@ -51,9 +48,7 @@ class QuestionRecord {
             "answers": JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
   }
 
-
-
-  async insertQuestion() {
+  async addQuestion() {
     if(!this.id){
       this.id = uuid();
     }
@@ -66,10 +61,6 @@ class QuestionRecord {
 
     return this.id
   }
-
-
-
-
 
 }
 

@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const { QuestionRecord } = require('../records/question.record')
+const { AnswerRecord } = require('../records/answer.record')
 
 const questionRouter = Router();
 
@@ -17,11 +18,14 @@ questionRouter
   .post('/', async (req, res) => {
     const data = req.body
     const newQuestion = new QuestionRecord(data)
-    const questionId = await newQuestion.insertQuestion();
+    const questionId = await newQuestion.addQuestion();
     res.json(questionId);
   })
 
-  .get('/:questionId/answers', (req, res) => {})
+  .get('/:questionId/answers', async (req, res) => {
+    const answers = await AnswerRecord.getAnswers(req.params.questionId)
+    res.json(answers)
+  })
 
   .post('/:questionId/answers',(req, res) => {})
 
