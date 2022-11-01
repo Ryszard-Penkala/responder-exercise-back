@@ -27,7 +27,28 @@ class AnswerRecord {
     return results;
   }
 
+  static async getAnswer(questionId, answerId){
+    const [result] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:questionId AND `id`=:answerId", {
+      questionId,
+      answerId,
+    });
+    return  result;
+  }
 
+  async addAnswer(questionId){
+    if(!this.id){
+      this.id = uuid();
+    }
+
+    await pool.execute("INSERT INTO `answer` VALUES(:id, :author, :summary, :questionId)", {
+      id: this.id,
+      author: this.author,
+      summary: this.summary,
+      questionId: questionId,
+    });
+
+    return this.id
+  }
 
 }
 
