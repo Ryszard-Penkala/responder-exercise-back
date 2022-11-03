@@ -22,6 +22,11 @@ questionRouter
     res.json(questionId);
   })
 
+  .delete('/:questionId', async (req, res) => {
+    const deletedQuestionId = await QuestionRecord.removeQuestion(req.params.questionId);
+    res.json(deletedQuestionId);
+  })
+
   .get('/:questionId/answers', async (req, res) => {
     const answers = await AnswerRecord.getAnswers(req.params.questionId);
     res.json(answers);
@@ -35,10 +40,22 @@ questionRouter
 
   })
 
+  .delete('/:questionId/answers', async (req, res)=>{
+    const deletedAnswerId = await AnswerRecord.removeAnswers(req.params.questionId);
+    res.json(deletedAnswerId);
+  })
+
   .get('/:questionId/answers/:answerId', async (req, res) => {
     const answer = await AnswerRecord.getAnswer(req.params.questionId, req.params.answerId);
     res.json(answer);
-  } )
+  })
+
+  .delete('/:questionId/answers/:answerId', async (req, res)=> {
+    const answer = await AnswerRecord.removeAnswerById(req.params.answerId);
+    res.json(answer);
+  })
+
+
 
 
 module.exports = {

@@ -21,45 +21,72 @@ class QuestionRecord {
 
   static async getAllQuestions(){
 
-    const [results] = await pool.execute("SELECT * FROM `question`");
-    return  results;
+    try{
+      const [results] = await pool.execute("SELECT * FROM `question`");
+      return  results;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   static async getAllQuestionsAndAnswers(){
 
-    const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`")
-    const outputArr = []
-    results.forEach(result => {
-      const questionObj = {
-        ...result,
-        "answers": JSON.parse(result.answers)[0].id === null ? [] : JSON.parse(result.answers),
-      };
-      outputArr.push(questionObj)
-    })
-    return outputArr;
+    try{
+      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`")
+      const outputArr = []
+      results.forEach(result => {
+        const questionObj = {
+          ...result,
+          "answers": JSON.parse(result.answers)[0].id === null ? [] : JSON.parse(result.answers),
+        };
+        outputArr.push(questionObj)
+      })
+      return outputArr;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   static async getQuestionById(questionId) {
-    const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
-    id: questionId,
-  })
+    try{
+      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
+        id: questionId,
+      })
 
-    return { ...results[0],
-            "answers": JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
+      return { ...results[0],
+        "answers": JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async addQuestion() {
-    if(!this.id){
-      this.id = uuid();
+    try{
+      if(!this.id){
+        this.id = uuid();
+      }
+
+      await pool.execute("INSERT INTO `question` VALUES(:id, :author, :summary)", {
+        id: this.id,
+        author: this.author,
+        summary: this.summary,
+      });
+
+      return this.id
+    } catch (e) {
+      console.log(e);
     }
+  }
 
-    await pool.execute("INSERT INTO `question` VALUES(:id, :author, :summary)", {
-      id: this.id,
-      author: this.author,
-      summary: this.summary,
-    });
-
-    return this.id
+  static async removeQuestion(questionId) {
+    try{
+      await pool.execute("DELETE FROM `question` WHERE `question`.`id` = :id ", {
+        id: questionId,
+      })
+      return questionId;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
 }

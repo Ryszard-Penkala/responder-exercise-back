@@ -21,18 +21,26 @@ class AnswerRecord {
   }
 
   static async getAnswers(questionId){
-    const [results] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:id", {
-      id: questionId,
-    });
-    return results;
+    try {
+      const [results] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:id", {
+        id: questionId,
+      });
+      return results;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   static async getAnswer(questionId, answerId){
-    const [result] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:questionId AND `id`=:answerId", {
-      questionId,
-      answerId,
-    });
-    return  result;
+    try{
+      const [result] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:questionId AND `id`=:answerId", {
+        questionId,
+        answerId,
+      });
+      return  result;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async addAnswer(questionId){
@@ -40,16 +48,41 @@ class AnswerRecord {
       this.id = uuid();
     }
 
-    await pool.execute("INSERT INTO `answer` VALUES(:id, :author, :summary, :questionId)", {
-      id: this.id,
-      author: this.author,
-      summary: this.summary,
-      questionId: questionId,
-    });
+    try {
+      await pool.execute("INSERT INTO `answer` VALUES(:id, :author, :summary, :questionId)", {
+        id: this.id,
+        author: this.author,
+        summary: this.summary,
+        questionId: questionId,
+      });
 
-    return this.id
+      return this.id
+    } catch (e) {
+      console.log(e);
+    }
   }
 
+  static async removeAnswers(questionId) {
+    try{
+      await pool.execute("DELETE FROM `answer` WHERE `answer`.`questionId` =:id", {
+        id: questionId,
+      });
+      return questionId;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  static async removeAnswerById(answerId) {
+    try{
+      await pool.execute("DELETE FROM `answer` WHERE `answer`.`id` =:id", {
+        id: answerId,
+      })
+      return answerId;
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 module.exports = {
