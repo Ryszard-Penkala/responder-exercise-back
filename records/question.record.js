@@ -37,7 +37,7 @@ class QuestionRecord {
       results.forEach(result => {
         const questionObj = {
           ...result,
-          "answers": JSON.parse(result.answers)[0].id === null ? [] : JSON.parse(result.answers),
+          "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)),
         };
         outputArr.push(questionObj)
       })
