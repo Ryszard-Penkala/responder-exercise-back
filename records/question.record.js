@@ -23,7 +23,7 @@ class QuestionRecord {
 
     try{
       const [results] = await pool.execute("SELECT * FROM `question`");
-      return  results;
+      return  results.length === 0 ? null : results.map(obj => new QuestionRecord(obj));
     } catch (e) {
       console.log(e);
     }
@@ -37,7 +37,8 @@ class QuestionRecord {
       results.forEach(result => {
         const questionObj = {
           ...result,
-          "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)),
+          // "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)), @TODO zrobić tak by działało
+          "answers": JSON.parse(result.answers)[0] === null ? [] : JSON.parse(result.answers),
         };
         outputArr.push(questionObj)
       })
@@ -47,14 +48,27 @@ class QuestionRecord {
     }
   }
 
-  static async getQuestionById(questionId) {
+  static async getQuestionByIdWithAnswers(questionId) {
     try{
       const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
         id: questionId,
       })
-
+      if (results.length === 0) {
+        return null;
+      }
       return { ...results[0],
         "answers": JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  static async getQuestionByIdWithoutAnswers(questionId) {
+    try {
+      const [results] = await pool.execute("SELECT * FROM `question` WHERE `question`.`id` =:id", {
+        id: questionId,
+      });
+      return  results.length === 0 ? null : new QuestionRecord(results[0]);
     } catch (e) {
       console.log(e);
     }
@@ -78,11 +92,25 @@ class QuestionRecord {
     }
   }
 
+  async update() {
+
+    await pool.execute("UPDATE `question` SET `author`=:author, `summary`=:summary WHERE `question`.`id`=:id", {
+      id: this.id,
+      author: this.author,
+      summary: this.summary,
+    });
+
+    return this.id;
+  }
+
   static async removeQuestion(questionId) {
     try{
+      await pool.execute("DELETE FROM `answer` WHERE `answer`.`questionId` = :id ", {
+        id: questionId,
+      });
       await pool.execute("DELETE FROM `question` WHERE `question`.`id` = :id ", {
         id: questionId,
-      })
+      });
       return questionId;
     } catch (e) {
       console.log(e);

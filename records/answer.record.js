@@ -25,7 +25,7 @@ class AnswerRecord {
       const [results] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:id", {
         id: questionId,
       });
-      return results;
+      return results.length === 0 ? null : results.map(obj => new AnswerRecord(obj));
     } catch (e) {
       console.log(e);
     }
@@ -37,7 +37,7 @@ class AnswerRecord {
         questionId,
         answerId,
       });
-      return  result;
+      return  result.length === 0 ? null : new AnswerRecord(result[0]);
     } catch (e) {
       console.log(e);
     }
@@ -82,6 +82,17 @@ class AnswerRecord {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async update() {
+
+    await pool.execute("UPDATE `answer` SET `author`=:author, `summary`=:summary WHERE `answer`.`id`=:id", {
+      id: this.id,
+      author: this.author,
+      summary: this.summary,
+    });
+
+    return this.id;
   }
 }
 
