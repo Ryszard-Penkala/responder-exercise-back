@@ -1,10 +1,16 @@
-const { pool } = require('../utils/db')
-const { ValidationError } = require('../utils/errors')
-const {v4: uuid} = require('uuid');
+import { pool } from '../utils/db'
+import { ValidationError } from '../utils/errors'
+import { v4 as uuid } from 'uuid'
+import { FieldPacket } from 'mysql2'
 
-class AnswerRecord {
+type AnswerRecordResults= [AnswerRecord[], FieldPacket[]]
 
-  constructor(obj) {
+export class AnswerRecord {
+  public id?: string;
+  public author: string;
+  public summary: string;
+  public questionId: string;
+  constructor(obj: AnswerRecord) {
 
     if (!obj.author || obj.author.length > 100 || obj.author.length < 1) {
       throw new ValidationError('Author name has to be not-empty string between 1 and 100 chars long.')
@@ -17,33 +23,34 @@ class AnswerRecord {
     this.id = obj.id;
     this.author = obj.author;
     this.summary = obj.summary;
+    this.questionId = obj.questionId;
 
   }
 
-  static async getAnswers(questionId){
+  static async getAnswers(questionId: string):  Promise<AnswerRecord[] | null>{
     try {
       const [results] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:id", {
         id: questionId,
-      });
+      }) as AnswerRecordResults;
       return results.length === 0 ? null : results.map(obj => new AnswerRecord(obj));
     } catch (e) {
       console.log(e);
     }
   }
 
-  static async getAnswer(questionId, answerId){
+  static async getAnswer(questionId: string, answerId: string): Promise<AnswerRecord | null>{
     try{
       const [result] = await pool.execute("SELECT `id`, `author`, `summary` FROM `answer` WHERE `questionId`=:questionId AND `id`=:answerId", {
         questionId,
         answerId,
-      });
+      }) as AnswerRecordResults;
       return  result.length === 0 ? null : new AnswerRecord(result[0]);
     } catch (e) {
       console.log(e);
     }
   }
 
-  async addAnswer(questionId){
+  async addAnswer(questionId: string): Promise<string>{
     if(!this.id){
       this.id = uuid();
     }
@@ -62,7 +69,7 @@ class AnswerRecord {
     }
   }
 
-  static async removeAnswers(questionId) {
+  static async removeAnswers(questionId: string): Promise<string> {
     try{
       await pool.execute("DELETE FROM `answer` WHERE `answer`.`questionId` =:id", {
         id: questionId,
@@ -73,7 +80,7 @@ class AnswerRecord {
     }
   }
 
-  static async removeAnswerById(answerId) {
+  static async removeAnswerById(answerId: string): Promise<string> {
     try{
       await pool.execute("DELETE FROM `answer` WHERE `answer`.`id` =:id", {
         id: answerId,
@@ -84,7 +91,7 @@ class AnswerRecord {
     }
   }
 
-  async update() {
+  async update(): Promise<string> {
 
     await pool.execute("UPDATE `answer` SET `author`=:author, `summary`=:summary WHERE `answer`.`id`=:id", {
       id: this.id,
@@ -94,8 +101,4 @@ class AnswerRecord {
 
     return this.id;
   }
-}
-
-module.exports = {
-  AnswerRecord,
 }

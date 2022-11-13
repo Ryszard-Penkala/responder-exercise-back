@@ -1,10 +1,9 @@
-const { Router } = require('express')
-const { QuestionRecord } = require('../records/question.record')
-const { AnswerRecord } = require('../records/answer.record')
-const { ValidationError } = require('../utils/errors')
-const { pool } = require('../utils/db')
+import { Router } from 'express'
+import { QuestionRecord } from '../records/question.record'
+import { AnswerRecord } from '../records/answer.record'
+import { ValidationError } from '../utils/errors'
 
-const questionRouter = Router();
+export const questionRouter = Router();
 
 questionRouter
   .get('/', async (req, res) => {
@@ -96,10 +95,3 @@ questionRouter
     const answer = await AnswerRecord.removeAnswerById(req.params.answerId);
     res.json(answer);
   })
-
-
-
-
-module.exports = {
-  questionRouter,
-}

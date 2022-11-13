@@ -1,16 +1,14 @@
-const express = require('express')
-require('express-async-errors');
-const { urlencoded, json } = require('body-parser')
-const cors = require('cors');
-require('./utils/db');
+import express from 'express'
+import 'express-async-errors';
+import { json, urlencoded } from 'body-parser'
+import cors from 'cors'
+import './utils/db';
 
-const makeRepositories = require('./middleware/repositories')
 const { handleError } = require('./utils/errors')
 const { homeRouter } = require('./routers/home')
 const { questionRouter } = require('./routers/question')
 
 
-const STORAGE_FILE_PATH = 'questions.json'
 const PORT = 3001
 
 const app = express()
@@ -18,7 +16,6 @@ const app = express()
 app.use(cors({origin: 'http://localhost:3000'}));
 app.use(urlencoded({ extended: true }))
 app.use(json())
-app.use(makeRepositories(STORAGE_FILE_PATH))
 
 app.use('/', homeRouter);
 app.use('/questions', questionRouter)
