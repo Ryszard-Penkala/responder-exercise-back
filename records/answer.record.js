@@ -10,8 +10,8 @@ class AnswerRecord {
       throw new ValidationError('Author name has to be not-empty string between 1 and 100 chars long.')
     }
 
-    if (!obj.summary || obj.summary.length <= 5 || obj.summary.length > 300) {
-      throw new ValidationError('Summary has to be not-empty string between 1 and 300 chars long.')
+    if (!obj.summary || obj.summary.length <= 2 || obj.summary.length > 300) {
+      throw new ValidationError('Summary has to be not-empty string between 3 and 300 chars long.')
     }
 
     this.id = obj.id;

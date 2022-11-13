@@ -5,8 +5,8 @@ const {v4: uuid} = require('uuid');
 class QuestionRecord {
   constructor(obj) {
 
-    if (!obj.summary || obj.summary.length <= 5 || obj.summary.length > 300) {
-      throw new ValidationError('Summary has to be not-empty string between 1 and 300 chars long.')
+    if (!obj.summary || obj.summary.length <= 2 || obj.summary.length > 300) {
+      throw new ValidationError('Summary has to be not-empty string between 3 and 300 chars long.')
     }
 
     if (!obj.author || obj.author.length > 100 || obj.author.length < 1) {
@@ -37,7 +37,7 @@ class QuestionRecord {
       results.forEach(result => {
         const questionObj = {
           ...result,
-          // "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)), @TODO zrobić tak by działało
+          // "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)), //@TODO zrobić tak by działało
           "answers": JSON.parse(result.answers)[0] === null ? [] : JSON.parse(result.answers),
         };
         outputArr.push(questionObj)
