@@ -17,8 +17,8 @@ app.use(cors({origin: 'http://localhost:3000'}));
 app.use(urlencoded({ extended: true }))
 app.use(json())
 
-app.use('/', homeRouter);
-app.use('/questions', questionRouter)
+app.use('/api/', homeRouter);
+app.use('/api/questions', questionRouter)
 
 app.use(handleError);
 
