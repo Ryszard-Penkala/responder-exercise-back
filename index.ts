@@ -3,6 +3,7 @@ import 'express-async-errors';
 import { json, urlencoded } from 'body-parser'
 import cors from 'cors'
 import './utils/db';
+import { config } from './config/config'
 
 const { handleError } = require('./utils/errors')
 const { homeRouter } = require('./routers/home')
@@ -13,7 +14,7 @@ const PORT = 3001
 
 const app = express()
 
-app.use(cors({origin: 'http://localhost:3000'}));
+app.use(cors({origin: config.corsOrigin}));
 app.use(urlencoded({ extended: true }))
 app.use(json())
 
