@@ -61,7 +61,7 @@ export class QuestionRecord {
 
   static async getQuestionByIdWithAnswers(questionId: string): Promise<QuestionRecord[] | null | any> {
     try{
-      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT OUTER JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
+      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`))) AS 'answers' FROM `question` LEFT OUTER JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
         id: questionId,
       }) as QuestionRecordResults;
       if (results.length === 0) {
