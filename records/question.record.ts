@@ -43,7 +43,7 @@ export class QuestionRecord {
   static async getAllQuestionsAndAnswers(): Promise<QuestionRecord[] | null> {
 
     try{
-      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`") as QuestionRecordResults;
+      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`") as QuestionRecordResults;
       const outputArr: QuestionRecord[] | [] | any = []
       results.forEach(result => {
         const questionObj: any = {
@@ -61,7 +61,7 @@ export class QuestionRecord {
 
   static async getQuestionByIdWithAnswers(questionId: string): Promise<QuestionRecord[] | null | any> {
     try{
-      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAYAGG(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
+      const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`)) AS 'answers' FROM `question` LEFT JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
         id: questionId,
       }) as QuestionRecordResults;
       if (results.length === 0) {
