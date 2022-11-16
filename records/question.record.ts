@@ -3,6 +3,7 @@ import { pool } from '../utils/db'
 import { ValidationError } from '../utils/errors'
 import { v4 as uuid } from 'uuid'
 import { AnswerRecord } from './answer.record'
+import { log } from 'util'
 
 type QuestionRecordResults= [QuestionRecord[], FieldPacket[]]
 
@@ -45,11 +46,15 @@ export class QuestionRecord {
     try{
       const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`))) AS 'answers' FROM `question` LEFT OUTER JOIN `answer` ON `question`.`id` = `answer`.`questionId` GROUP BY `question`.`id`") as QuestionRecordResults;
       const outputArr: QuestionRecord[] | [] | any = []
+
       results.forEach(result => {
+        const temp = JSON.parse(result.answers)[0];
+        const temp2 = temp.replaceAll('},', `},`);
+        const temp3 = JSON.parse(`[${temp2}]`);
         const questionObj: any = {
           ...result,
           // "answers": JSON.parse(JSON.parse(result.answers)[0]).id === null ? [] : (JSON.parse(result.answers)).map( res => JSON.parse(res)), //@TODO zrobić tak by działało
-          answers: JSON.parse(result.answers)[0] === null ? [] : JSON.parse(result.answers),
+          answers: temp3[0].id === null ? [] : temp3,
         };
         outputArr.push(questionObj)
       })
@@ -64,11 +69,15 @@ export class QuestionRecord {
       const [results] = await pool.execute("SELECT `question`.*, JSON_ARRAY(GROUP_CONCAT(JSON_OBJECT('id', `answer`.`id`, 'author', `answer`.`author`, 'summary', `answer`.`summary`))) AS 'answers' FROM `question` LEFT OUTER JOIN `answer` ON `question`.`id` = `answer`.`questionId` WHERE `question`.`id` = :id GROUP BY `question`.`id`", {
         id: questionId,
       }) as QuestionRecordResults;
+
       if (results.length === 0) {
         return null;
       }
+      const temp = (JSON.parse(results[0].answers))
+      const temp2 = temp[0].replaceAll('},', `},`);
+      const temp3 = JSON.parse(`[${temp2}]`);
       return { ...results[0],
-        answers: JSON.parse(results[0].answers)[0].id === null ? [] : JSON.parse(results[0].answers)}
+        answers: temp3[0].id === null ? [] : temp3}
     } catch (e) {
       console.log(e);
     }
